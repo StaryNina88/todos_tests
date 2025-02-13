@@ -1,0 +1,70 @@
+from __future__ import annotations
+from typing import Any
+
+import pytest
+from http import HTTPStatus
+
+from client.api import APIClient
+
+
+@pytest.mark.api
+@pytest.mark.parametrize(
+    "idx, title, description, completed",
+    [
+        (1, "Помыть полы", "С мистером пропером",   True),
+        (2, "Помыть полы", "С мылом",               False),
+        (3, "Помыть полы", None,                    False),
+    ]
+)
+def test_create_todo(api_client: APIClient, idx: int, title: str, description: str | None, completed: bool):
+    """ Позитивная проверка создания записи """
+    # Формирование тела запроса
+    body = {
+        "id": idx,
+        "title": title,
+        "description": description,
+        "completed": completed
+    }
+    # Отправка запроса
+    response = api_client.post("/todos", json=body).json()
+
+    # Проверка тела ответа
+    assert response["data"] is None
+    assert response["error"] is None
+    assert response["success"] is True
+
+
+@pytest.mark.api
+@pytest.mark.parametrize(
+    "idx, title, description, completed",
+    [
+        # idx
+        (-1,        "Помыть полы", "С мистером пропером", True),
+        (0,         "Помыть полы", "С мистером пропером", True),
+        (1.1,       "Помыть полы", "С мистером пропером", True),
+        ('null',    "Помыть полы", "С мистером пропером", True),
+        (None,      "Помыть полы", "С мистером пропером", True),
+    ]
+)
+def test_create_todo_negative(api_client: APIClient, idx: Any, title: Any, description: Any, completed: Any):
+    """ Негативная проверка создания записи """
+    body = {
+        "id": idx,
+        "title": title,
+        "description": description,
+        "completed": completed
+    }
+    response = api_client.post("/todos", json=body, status_code=HTTPStatus.BAD_REQUEST).json()
+
+    # Проверка тела ответа
+    assert response["success"] is False
+    assert response["data"] is None
+
+    # В зависимости от типа переменной разный ответ
+    if isinstance(idx, int) and idx < 1:
+        error = 'id: ensure this value is greater than or equal to 1'
+    elif isinstance(idx, str):
+        error = 'id: value is not a valid integer'
+    else:
+        error = 'id: none is not an allowed value'
+    assert response["error"] == error
