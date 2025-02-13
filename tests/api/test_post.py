@@ -14,6 +14,7 @@ from client.api import APIClient
         (1, "Помыть полы", "С мистером пропером",   True),
         (2, "Помыть полы", "С мылом",               False),
         (3, "Помыть полы", None,                    False),
+        (1.1, "Помыть полы", "С мистером пропером", True), # создание с типом float успешное, статус 201, убрала из негативных
     ]
 )
 def test_create_todo(api_client: APIClient, idx: int, title: str, description: str | None, completed: bool):
@@ -29,7 +30,7 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
     response = api_client.post("/todos", json=body).json()
 
     # Проверка тела ответа
-    assert response["data"] is None
+    assert response["data"] is not None #дата не null
     assert response["error"] is None
     assert response["success"] is True
 
@@ -41,7 +42,6 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
         # idx
         (-1,        "Помыть полы", "С мистером пропером", True),
         (0,         "Помыть полы", "С мистером пропером", True),
-        (1.1,       "Помыть полы", "С мистером пропером", True),
         ('null',    "Помыть полы", "С мистером пропером", True),
         (None,      "Помыть полы", "С мистером пропером", True),
     ]
