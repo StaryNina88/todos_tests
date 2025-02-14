@@ -29,6 +29,7 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
     # Отправка запроса
     response = api_client.post("/todos", json=body).json()
 
+
     # Проверка тела ответа
     assert response["data"] is not None #дата не null
     assert response["error"] is None
