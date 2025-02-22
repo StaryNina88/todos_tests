@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from http import HTTPStatus
 
-from client.api import APIClient
+from tests.api.todos.helper.client_api_todos import APITodos
 
 
 @pytest.mark.api
@@ -17,7 +17,10 @@ from client.api import APIClient
         (1.1, "Помыть полы", "С мистером пропером", True), # создание с типом float успешное, статус 201, убрала из негативных
     ]
 )
-def test_create_todo(api_client: APIClient, idx: int, title: str, description: str | None, completed: bool):
+def test_create_todo(
+        api_todos: APITodos, fixture_clear_data: None,
+        idx: int, title: str, description: str | None, completed: bool
+):
     """ Позитивная проверка создания записи """
     # Формирование тела запроса
     body = {
@@ -27,11 +30,10 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
         "completed": completed
     }
     # Отправка запроса
-    response = api_client.post("/todos", json=body).json()
-
+    response = api_todos.post_todos(data=body).json()
 
     # Проверка тела ответа
-    assert response["data"] is not None #дата не null
+    assert response["data"] is not None
     assert response["error"] is None
     assert response["success"] is True
 
@@ -40,24 +42,24 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
 @pytest.mark.parametrize(
     "idx, title, description, completed",
     [
-        # idx
         (-1,        "Помыть полы", "С мистером пропером", True),
         (0,         "Помыть полы", "С мистером пропером", True),
         ('null',    "Помыть полы", "С мистером пропером", True),
         (None,      "Помыть полы", "С мистером пропером", True),
     ]
 )
-def test_create_todo_negative(api_client: APIClient, idx: Any, title: Any, description: Any, completed: Any):
+def test_create_todo_negative(api_todos: APITodos, idx: Any, title: Any, description: Any, completed: Any):
     """ Негативная проверка создания записи """
-    body = {
-        "id": idx,
-        "title": title,
-        "description": description,
-        "completed": completed
-    }
-    response = api_client.post("/todos", json=body, status_code=HTTPStatus.BAD_REQUEST).json()
+    response = api_todos.post_todos(
+        data={
+            "id": idx,
+            "title": title,
+            "description": description,
+            "completed": completed
+        },
+        status_code=HTTPStatus.BAD_REQUEST
+    ).json()
 
-    # Проверка тела ответа
     assert response["success"] is False
     assert response["data"] is None
 
