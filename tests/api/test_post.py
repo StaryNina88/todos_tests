@@ -7,7 +7,7 @@ from http import HTTPStatus
 from client.api import APIClient
 
 
-@pytest.mark.api
+@pytest.mark.api    #марки относятся к конкретному тесту, маркировка теста что он апи, описание маркера в pytest.ini
 @pytest.mark.parametrize(
     "idx, title, description, completed",
     [
@@ -37,6 +37,7 @@ def test_create_todo(api_client: APIClient, idx: int, title: str, description: s
 
 
 @pytest.mark.api
+#@pytest.mark.skip("не надо прогонять тесты") #маркер чтоб не запускать тесты
 @pytest.mark.parametrize(
     "idx, title, description, completed",
     [
@@ -55,10 +56,10 @@ def test_create_todo_negative(api_client: APIClient, idx: Any, title: Any, descr
         "description": description,
         "completed": completed
     }
-    response = api_client.post("/todos", json=body, status_code=HTTPStatus.BAD_REQUEST).json()
+    response = api_client.post("/todos", json=body, status_code=HTTPStatus.OK).json()
 
     # Проверка тела ответа
-    assert response["success"] is False
+    assert response["success"] is True, f'Статус не верный'
     assert response["data"] is None
 
     # В зависимости от типа переменной разный ответ

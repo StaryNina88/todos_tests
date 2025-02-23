@@ -18,4 +18,4 @@ class GetId(Endpoint):
 
     # проверка статус кода ответа
     def check_response_is_404(self):
-        assert self.response.status_code == 404
+        assert self.response.status_code == 404 , 'Не верный статус код'
